@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { prisma } from "./helpers/prisma.js";
 import authRouter from "./routes/authRouter.js";
+import picturesRouter from "./routes/picturesRouter.js";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRouter);
+app.use("/pictures", picturesRouter);
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });

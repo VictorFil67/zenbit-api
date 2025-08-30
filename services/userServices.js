@@ -6,4 +6,15 @@ async function findUser(email) {
   });
 }
 
-export default { findUser };
+async function getUser(tempCode) {
+  return await prisma.user.findUnique({
+    where: { tempCode },
+  });
+}
+async function findUserById(id) {
+  return await prisma.user.findUnique({
+    where: { id },
+  });
+}
+
+export default { findUser, getUser, findUserById };
