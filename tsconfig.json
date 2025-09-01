@@ -1,0 +1,43 @@
+// {
+//   "compilerOptions": {
+//     "target": "ES2021",
+//     "module": "commonjs",
+//     "rootDir": "src",
+//     "outDir": "dist",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "skipLibCheck": true
+//   },
+//   "include": ["src"]
+// }
+
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "commonjs",
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,     // 👉 разрешаем JS
+    "checkJs": false,     // 👉 ошибки в JS игнорим
+    "types": ["node", "express"]
+  },
+  "include": ["src", "src/types"]
+}
+
+// {
+//   "compilerOptions": {
+//     "target": "ES2021",
+//     "module": "ESNext",       // ✅ важно для import/export
+//     "rootDir": "src",
+//     "outDir": "dist",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "skipLibCheck": true,
+//     "allowJs": true,
+//     "checkJs": false
+//   },
+//   "include": ["src"]
+// }

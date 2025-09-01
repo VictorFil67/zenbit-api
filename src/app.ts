@@ -2,9 +2,10 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
-import { prisma } from "./helpers/prisma.js";
-import authRouter from "./routes/authRouter.js";
-import picturesRouter from "./routes/picturesRouter.js";
+import { prisma } from "./helpers/prisma";
+import authRouter from "./routes/authRouter";
+import picturesRouter from "./routes/picturesRouter";
+import { Request, Response, NextFunction } from "express";
 
 dotenv.config();
 
@@ -21,7 +22,12 @@ app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-app.use((err, req, res, next) => {
+interface CustomError extends Error {
+  status?: number;
+  message: string;
+}
+
+app.use((err: CustomError, req: Request, res: Response, next: NextFunction) => {
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
 });
@@ -35,7 +41,11 @@ async function startServer() {
       console.log(`Server is running on port: ${PORT}`);
     });
   } catch (error) {
-    console.error("Error connecting to the database:", error.message);
+    if (error instanceof Error) {
+      console.error("Error connecting to the database:", error.message);
+    } else {
+      console.error("Error connecting to the database:", error);
+    }
     process.exit(1);
   }
 }

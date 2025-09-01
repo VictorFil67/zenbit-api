@@ -1,18 +1,19 @@
-import HttpError from "../helpers/HttpError.js";
-import ctrlWrapper from "../decorators/ctrlWrapper.js";
-import userServices from "../services/userServices.js";
-import authServices from "../services/authServices.js";
+import HttpError from "../helpers/HttpError";
+import ctrlWrapper from "../decorators/ctrlWrapper";
+import userServices from "../services/userServices";
+import authServices from "../services/authServices";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import { generateRandomCode } from "../helpers/generateRandomCode.js";
-import sendEmail from "../helpers/sendEmail.js";
+import { generateRandomCode } from "../helpers/generateRandomCode";
+import sendEmail from "../helpers/sendEmail";
+import { Request, Response } from "express";
 
 const { JWT_SECRET, DEPLOY_HOST } = process.env;
 
 const DELAY = 30 * 60 * 1000; // 30 minutes
 
-const signup = async (req, res) => {
+const signup = async (req: Request, res: Response) => {
   const { email } = req.body;
   const user = await userServices.findUser(email);
   if (user) {
@@ -24,7 +25,7 @@ const signup = async (req, res) => {
   });
 };
 
-const signin = async (req, res) => {
+const signin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await userServices.findUser(email);
   if (!user) {
@@ -38,7 +39,7 @@ const signin = async (req, res) => {
     id: user.id,
     email: user.email,
   };
-  const token = jwt.sign(payload, JWT_SECRET, {
+  const token = jwt.sign(payload, JWT_SECRET as string, {
     expiresIn: "23h",
   });
   await authServices.setToken(user.id, token);
@@ -50,7 +51,7 @@ const signin = async (req, res) => {
   });
 };
 
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req: Request, res: Response) => {
   const { email } = req.body;
 
   const user = await userServices.findUser(email);
@@ -60,7 +61,7 @@ const forgotPassword = async (req, res) => {
 
   const id = user.id;
   const tempCode = generateRandomCode();
-  const tempCodeExpiresAt = Date.now() + DELAY;
+  const tempCodeExpiresAt = BigInt(Date.now() + DELAY);
 
   await authServices.updateUserTempCode(id, tempCode, tempCodeExpiresAt);
   const userEmail = {
@@ -88,7 +89,7 @@ const forgotPassword = async (req, res) => {
   });
 };
 
-const updatePassword = async (req, res) => {
+const updatePassword = async (req: Request, res: Response) => {
   const { tempCode } = req.params;
   const { newPassword } = req.body;
 
@@ -98,7 +99,7 @@ const updatePassword = async (req, res) => {
   }
 
   if (!user.tempCodeExpiresAt || user.tempCodeExpiresAt < Date.now()) {
-    throw new HttpError(
+    throw HttpError(
       403,
       "Unfortunately, your link has expired, so you can't access this action. Try to recover your password again."
     );
@@ -111,7 +112,10 @@ const updatePassword = async (req, res) => {
   });
 };
 
-const logout = async (req, res) => {
+const logout = async (req: Request, res: Response) => {
+  if (!req.user || !req.user.id) {
+    throw HttpError(401, "Unauthorized");
+  }
   const { id } = req.user;
   await authServices.setToken(id);
   res.json({
@@ -119,7 +123,10 @@ const logout = async (req, res) => {
   });
 };
 
-const getCurrent = async (req, res) => {
+const getCurrent = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw HttpError(401, "Unauthorized");
+  }
   const { email } = req.user;
   res.json({
     email,
